@@ -1,12 +1,16 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { RegisterDto } from '../auth/dto/registerUser.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schemas/user.schema';
 import { Model } from 'mongoose';
-
+import { LoginDto } from '../auth/dto/loginUser.dto';
+import { JwtService } from '@nestjs/jwt';
+import bcrypt from 'bcrypt'
 @Injectable()
 export class UserService {
-    constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+    constructor(
+        @InjectModel(User.name) private userModel: Model<User>
+    ) {}
   async createUser (registerUserDto:RegisterDto){
 
      try {
@@ -15,7 +19,8 @@ export class UserService {
                 fname:registerUserDto.fname,
                 lname:registerUserDto.lname,
                 email:registerUserDto.email,
-                password:registerUserDto.password
+                password:registerUserDto.password,
+                role:registerUserDto.role
             }
         )
        
@@ -36,4 +41,13 @@ export class UserService {
   throw error;
      }  
     }
+
+  async findByEmail(email: string) {
+    console.log("email",email)
+    return await this.userModel.findOne({ email });
+  }
+
+  async getUserById(id:string){
+    return await this.userModel.findOne({_id:id})
+  }
 }
